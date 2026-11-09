@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Three working automation demos: turn requests into tasks, clean contact CSVs, and verify signed webhooks.">
+  <title>Workflow Lab · Automation demos</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to workspace</a>
+  <aside class="sidebar">
+    <a class="brand" href="#intake" aria-label="Workflow Lab home">
+      <span class="brand-mark" aria-hidden="true">w.</span>
+      <span>Workflow Lab<small>Automation demos</small></span>
+    </a>
+    <p class="nav-label">Workspace</p>
+    <nav aria-label="Demos">
+      <a href="#intake" aria-current="page"><span class="nav-number">01</span>Request intake<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+      <a href="#import"><span class="nav-number">02</span>Contact import<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+      <a href="#webhooks"><span class="nav-number">03</span>Webhook inbox<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></a>
+    </nav>
+    <div class="sidebar-note">
+      <span class="workspace-dot" aria-hidden="true"></span>
+      <strong>Demo workspace</strong>
+      <p>Synthetic data. Real operations.<br>No external services or API fees.</p>
+    </div>
+    <div class="sidebar-footer">Built by Fazliddin Vojipov<span>Python · FastAPI · SQLite</span></div>
+  </aside>
+  <div class="shell">
+    <header class="topbar">
+      <span class="breadcrumb">Workspace <span aria-hidden="true">/</span> <strong id="breadcrumb">Request intake</strong></span>
+      <div class="topbar-actions"><span id="connection" class="connection">Connecting…</span><button class="text-button" id="reset-open" type="button">Reset demo</button></div>
+    </header>
+    <main id="main" tabindex="-1">
+      <div id="error-banner" class="error-banner" role="alert" hidden></div>
+      <section id="intake" class="demo-panel" aria-labelledby="intake-heading">
+        <div class="page-heading">
+          <div><p class="section-index">01 / Request intake</p><h1 id="intake-heading">A clear next step.<br>From an ordinary message.</h1><p class="lede">Extract the essentials, check what’s missing, and put a task into motion.</p></div>
+          <span class="tech-tag">Rule-based extraction</span>
+        </div>
+        <div class="intake-grid">
+          <form class="surface source-panel" id="intake-form">
+            <div class="panel-heading"><div><span class="step-label">Step 1</span><h2>The incoming request</h2></div><span class="pill">Text → fields</span></div>
+            <label for="message">Request message</label>
+            <textarea id="message" name="message" required maxlength="2000" rows="7" aria-describedby="message-help"></textarea>
+            <p class="field-help" id="message-help">Try an ISO date, “Assign to Mira” and “Priority: high”. This demo uses explicit rules, not an AI model.</p>
+            <div class="sample-actions"><button type="button" class="text-button" id="load-complete">Complete example</button><button type="button" class="text-button" id="load-missing">Missing details</button></div>
+            <button class="button primary" type="submit" id="extract-button">Preview task <span aria-hidden="true">↗</span></button>
+          </form>
+          <form class="surface review-panel" id="task-form">
+            <div class="panel-heading"><div><span class="step-label">Step 2</span><h2>You make the final call</h2></div><span class="review-marker" aria-hidden="true">✓</span></div>
+            <p id="review-note" class="review-note" role="status">Preview a message to review its fields here.</p>
+            <fieldset id="task-fields" disabled>
+              <legend class="sr-only">Review the extracted task</legend>
+              <label for="task-title">Task title</label><input id="task-title" required maxlength="160" autocomplete="off">
+              <div class="form-row"><div><label for="task-owner">Owner</label><input id="task-owner" required maxlength="80" autocomplete="off" placeholder="Who is responsible?"></div><div><label for="task-date">Due date</label><input id="task-date" type="date" required></div></div>
+              <label for="task-priority">Priority</label><select id="task-priority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select>
+              <button class="button dark" type="submit">Create task <span aria-hidden="true">→</span></button>
+            </fieldset>
+          </form>
+        </div>
+        <div class="queue-heading"><div><h2>The working queue <span id="task-count" class="count-badge">0</span></h2><p>Changes are saved in a local SQLite database.</p></div><span class="quiet-label">Use the status menu to move a task</span></div>
+        <div class="task-board" id="task-board" aria-label="Task queue"></div>
+      </section>
+      <section id="import" class="demo-panel" aria-labelledby="import-heading" hidden>
+        <div class="page-heading"><div><p class="section-index">02 / Contact import</p><h1 id="import-heading">Messy data in.<br>Useful contacts out.</h1><p class="lede">Normalize, validate and deduplicate before the file reaches your workflow.</p></div><span class="tech-tag">CSV validation</span></div>
+        <form class="surface import-source" id="import-form">
+          <div class="panel-heading"><div><h2>Start with the source</h2><p>Paste a CSV or choose a UTF-8 file. Up to 500 contacts.</p></div><label class="button secondary file-button" for="csv-file">Choose CSV<input id="csv-file" type="file" accept=".csv,text/csv"></label></div>
+          <label for="csv-text">Contact CSV</label><textarea id="csv-text" required maxlength="120000" rows="7" spellcheck="false" class="code-input" aria-describedby="csv-help"></textarea>
+          <div class="import-controls"><p id="csv-help" class="field-help">Required: name, email. Optional: company. Only these three columns are exported.</p><div><button type="button" class="text-button" id="load-csv">Load example</button><button class="button primary" type="submit">Check contacts <span aria-hidden="true">↗</span></button></div></div>
+        </form>
+        <div class="empty-state" id="import-empty"><span aria-hidden="true">↳</span><h2>Give your next import a clean start.</h2><p>The example includes duplicates, missing details and a spreadsheet formula.</p></div>
+        <div id="import-result" hidden>
+          <div class="validation-strip"><div><strong id="ready-count">0</strong><span>ready to export</span></div><div><strong id="review-count">0</strong><span>need review</span></div><div><strong id="safe-count">0</strong><span>formula cells escaped</span></div><button type="button" class="button dark" id="download-csv">Download clean CSV <span aria-hidden="true">↓</span></button></div>
+          <div class="surface table-surface"><div class="table-heading"><h2>Validation report</h2><p id="table-caption"></p></div><div class="table-scroll" tabindex="0" role="region" aria-label="Contact validation results"><table><thead><tr><th scope="col">Row</th><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Company</th><th scope="col">Result</th></tr></thead><tbody id="contact-rows"></tbody></table></div></div>
+          <p class="footnote">Rows needing review are excluded from export. Leading =, +, - and @ are escaped with an apostrophe for spreadsheet safety. Email checks validate format, not mailbox existence.</p>
+        </div>
+      </section>
+      <section id="webhooks" class="demo-panel" aria-labelledby="webhook-heading" hidden>
+        <div class="page-heading"><div><p class="section-index">03 / Webhook inbox</p><h1 id="webhook-heading">Receive once.<br>Even when they send twice.</h1><p class="lede">Verify the signature, remember the event, and keep duplicate work out of the queue.</p></div><span class="tech-tag">HMAC · Idempotency</span></div>
+        <div class="webhook-grid">
+          <div class="surface webhook-source"><div class="panel-heading"><div><span class="step-label">Local simulator</span><h2>An event from another system</h2></div><span class="pill">POST</span></div><div class="endpoint">/api/webhooks</div><pre id="event-json" tabindex="0" aria-label="Sample webhook payload"></pre><label for="event-id">Event ID</label><input id="event-id" value="evt_cedar_001" maxlength="80" pattern="[A-Za-z0-9_-]+" required autocomplete="off" aria-describedby="event-help"><p class="field-help" id="event-help">Reuse an ID to test replay protection. Change it to create a new task.</p><div class="event-actions"><button type="button" id="send-valid" class="button primary">Send signed event <span aria-hidden="true">↗</span></button><button type="button" id="send-invalid" class="button secondary">Test invalid signature</button></div></div>
+          <div class="surface receipt-panel"><div class="panel-heading"><div><span class="step-label">Verification receipt</span><h2>Trust, then act.</h2></div><span class="receipt-glyph" aria-hidden="true">↳</span></div><div id="receipt" class="receipt-empty" role="status"><div class="receipt-icon" aria-hidden="true">✓</div><h3>Waiting for an event</h3><p>Send the same event twice. The second attempt keeps the original task.</p></div><div class="invariant"><span aria-hidden="true">↔</span><p>One verified event ID.<br><strong>One task in the database.</strong></p></div></div>
+        </div>
+        <div class="queue-heading"><div><h2>Delivery attempts <span id="attempt-count" class="count-badge">0</span></h2><p>Actual results from the signature and replay checks.</p></div></div>
+        <div class="delivery-summary" id="delivery-summary"></div>
+        <div class="surface table-surface"><div class="table-scroll" tabindex="0" role="region" aria-label="Webhook delivery attempts"><table><thead><tr><th scope="col">Event</th><th scope="col">Outcome</th><th scope="col">Received</th></tr></thead><tbody id="attempt-rows"></tbody></table></div></div>
+        <p class="footnote">The simulator signs real payloads on the server and uses the same handler as the webhook endpoint. It is intentionally available only for this local demonstration.</p>
+      </section>
+      <footer class="main-footer"><span>Workflow Lab</span><p>Small systems, built to be understood.</p><span>Local-first demonstration</span></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <dialog id="reset-dialog"><form method="dialog"><span class="step-label">Demo workspace</span><h2>Start with a clean slate?</h2><p>This deletes local demo tasks and webhook history, then restores the four example tasks. Your source CSV is not saved on the server.</p><div class="dialog-actions"><button class="button secondary" value="cancel">Keep working</button><button class="button dark" value="reset">Reset demo data</button></div></form></dialog>
+</body>
+</html>
